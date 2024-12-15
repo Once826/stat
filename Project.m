@@ -94,6 +94,7 @@ grid on;
 corr_SP500_DAX_USD_EUR = corr(combinedData.SP500_DAX_Ratio, combinedData.Close_USD_EURTT, 'Rows', 'complete');
 disp(['Correlation between S&P 500 / DAX Ratio and USD/EUR: ', num2str(corr_SP500_DAX_USD_EUR)]);
 
+%% Pre-crash Period Analysis
 % Define the end date for the pre-crash period
 preCrashEndDate = datetime('2007-12-31');
 
@@ -148,6 +149,7 @@ title('Pre-Crash: S&P 500 / DAX Ratio vs USD/EUR Rate');
 xlabel('Date');
 grid on;
 
+%% Crash Period Analysis
 % Define the start and end dates for the crash period
 crashStartDate = datetime('2008-01-01');
 crashEndDate = datetime('2009-12-31');
@@ -203,6 +205,133 @@ title('Crash: S&P 500 / DAX Ratio vs USD/EUR Rate');
 xlabel('Date');
 grid on;
 
+%% Recovery Period Analysis
+% --- Define time periods ---
+recoveryStartDate = datetime('2010-01-01');
+recoveryEndDate = datetime('2019-12-31');
+
+
+% Filter data for the recovery period
+SP500_Recovery = SP500TT((SP500TT.Date >= recoveryStartDate) & (SP500TT.Date <= recoveryEndDate), :);
+DAX_Recovery = DAXTT((DAXTT.Date >= recoveryStartDate) & (DAXTT.Date <= recoveryEndDate), :);
+FTSE100_Recovery = FTSE100TT((FTSE100TT.Date >= recoveryStartDate) & (FTSE100TT.Date <= recoveryEndDate), :);
+USD_GBP_Recovery = USD_GBPTT((USD_GBPTT.Date >= recoveryStartDate) & (USD_GBPTT.Date <= recoveryEndDate), :);
+USD_EUR_Recovery = USD_EURTT((USD_EURTT.Date >= recoveryStartDate) & (USD_EURTT.Date <= recoveryEndDate), :);
+
+% Synchronize data
+combined_Recovery = synchronize(SP500_Recovery, DAX_Recovery, FTSE100_Recovery, USD_GBP_Recovery, USD_EUR_Recovery, 'union', 'linear');
+
+% Calculate ratios
+combined_Recovery.SP500_FTSE_Ratio = combined_Recovery.Close_SP500_Recovery ./ combined_Recovery.Close_FTSE100_Recovery;
+combined_Recovery.SP500_DAX_Ratio = combined_Recovery.Close_SP500_Recovery ./ combined_Recovery.Close_DAX_Recovery;
+
+% Descriptive statistics
+mean_SP500_Recovery = mean(combined_Recovery.Close_SP500_Recovery, 'omitnan');
+mean_DAX_Recovery = mean(combined_Recovery.Close_DAX_Recovery, 'omitnan');
+mean_FTSE_Recovery = mean(combined_Recovery.Close_FTSE100_Recovery, 'omitnan');
+corr_Recovery_FTSE = corr(combined_Recovery.SP500_FTSE_Ratio, combined_Recovery.Close_USD_GBP_Recovery, 'Rows', 'complete');
+
+disp(['Mean S&P 500: ', num2str(mean_SP500_Recovery)]);
+disp(['Mean DAX: ', num2str(mean_DAX_Recovery)]);
+disp(['Mean FTSE 100: ', num2str(mean_FTSE_Recovery)]);
+disp(['Correlation (S&P 500 / FTSE 100 Ratio vs USD/GBP): ', num2str(corr_Recovery_FTSE)]);
+
+% Visualization
+figure;
+yyaxis left;
+plot(combined_Recovery.Date, combined_Recovery.SP500_FTSE_Ratio, '-b');
+ylabel('S&P 500 / FTSE 100 Ratio');
+yyaxis right;
+plot(combined_Recovery.Date, combined_Recovery.Close_USD_GBP_Recovery, '-r');
+ylabel('USD/GBP Exchange Rate');
+title('Recovery: S&P 500 / FTSE 100 Ratio vs USD/GBP');
+xlabel('Date');
+grid on;
+
+%% COVID Period Analysis
+% --- Define time periods ---
+covidStartDate = datetime('2020-01-01');
+covidEndDate = datetime('2021-12-31');
+
+% Filter data for the COVID period
+SP500_COVID = SP500TT((SP500TT.Date >= covidStartDate) & (SP500TT.Date <= covidEndDate), :);
+DAX_COVID = DAXTT((DAXTT.Date >= covidStartDate) & (DAXTT.Date <= covidEndDate), :);
+FTSE100_COVID = FTSE100TT((FTSE100TT.Date >= covidStartDate) & (FTSE100TT.Date <= covidEndDate), :);
+USD_GBP_COVID = USD_GBPTT((USD_GBPTT.Date >= covidStartDate) & (USD_GBPTT.Date <= covidEndDate), :);
+USD_EUR_COVID = USD_EURTT((USD_EURTT.Date >= covidStartDate) & (USD_EURTT.Date <= covidEndDate), :);
+
+% Synchronize data
+combined_COVID = synchronize(SP500_COVID, DAX_COVID, FTSE100_COVID, USD_GBP_COVID, USD_EUR_COVID, 'union', 'linear');
+
+% Calculate ratios
+combined_COVID.SP500_FTSE_Ratio = combined_COVID.Close_SP500_COVID ./ combined_COVID.Close_FTSE100_COVID;
+combined_COVID.SP500_DAX_Ratio = combined_COVID.Close_SP500_COVID ./ combined_COVID.Close_DAX_COVID;
+
+% Descriptive statistics
+mean_SP500_COVID = mean(combined_COVID.Close_SP500_COVID, 'omitnan');
+mean_DAX_COVID = mean(combined_COVID.Close_DAX_COVID, 'omitnan');
+mean_FTSE_COVID = mean(combined_COVID.Close_FTSE100_COVID, 'omitnan');
+corr_COVID_FTSE = corr(combined_COVID.SP500_FTSE_Ratio, combined_COVID.Close_USD_GBP_COVID, 'Rows', 'complete');
+
+disp(['Mean S&P 500: ', num2str(mean_SP500_COVID)]);
+disp(['Mean DAX: ', num2str(mean_DAX_COVID)]);
+disp(['Mean FTSE 100: ', num2str(mean_FTSE_COVID)]);
+disp(['Correlation (S&P 500 / FTSE 100 Ratio vs USD/GBP): ', num2str(corr_COVID_FTSE)]);
+
+% Visualization
+figure;
+yyaxis left;
+plot(combined_COVID.Date, combined_COVID.SP500_FTSE_Ratio, '-b');
+ylabel('S&P 500 / FTSE 100 Ratio');
+yyaxis right;
+plot(combined_COVID.Date, combined_COVID.Close_USD_GBP_COVID, '-r');
+ylabel('USD/GBP Exchange Rate');
+title('COVID: S&P 500 / FTSE 100 Ratio vs USD/GBP');
+xlabel('Date');
+grid on;
+
+%% Post-COVID Period Analysis
+% --- Define time periods ---
+postCovidStartDate = datetime('2022-01-01');
+
+% Filter data for the post-COVID period
+SP500_PostCOVID = SP500TT(SP500TT.Date >= postCovidStartDate, :);
+DAX_PostCOVID = DAXTT(DAXTT.Date >= postCovidStartDate, :);
+FTSE100_PostCOVID = FTSE100TT(FTSE100TT.Date >= postCovidStartDate, :);
+USD_GBP_PostCOVID = USD_GBPTT(USD_GBPTT.Date >= postCovidStartDate, :);
+USD_EUR_PostCOVID = USD_EURTT(USD_EURTT.Date >= postCovidStartDate, :);
+
+% Synchronize data
+combined_PostCOVID = synchronize(SP500_PostCOVID, DAX_PostCOVID, FTSE100_PostCOVID, USD_GBP_PostCOVID, USD_EUR_PostCOVID, 'union', 'linear');
+
+% Calculate ratios
+combined_PostCOVID.SP500_FTSE_Ratio = combined_PostCOVID.Close_SP500_PostCOVID ./ combined_PostCOVID.Close_FTSE100_PostCOVID;
+combined_PostCOVID.SP500_DAX_Ratio = combined_PostCOVID.Close_SP500_PostCOVID ./ combined_PostCOVID.Close_DAX_PostCOVID;
+
+% Descriptive statistics
+mean_SP500_PostCOVID = mean(combined_PostCOVID.Close_SP500_PostCOVID, 'omitnan');
+mean_DAX_PostCOVID = mean(combined_PostCOVID.Close_DAX_PostCOVID, 'omitnan');
+mean_FTSE_PostCOVID = mean(combined_PostCOVID.Close_FTSE100_PostCOVID, 'omitnan');
+corr_PostCOVID_FTSE = corr(combined_PostCOVID.SP500_FTSE_Ratio, combined_PostCOVID.Close_USD_GBP_PostCOVID, 'Rows', 'complete');
+
+disp(['Mean S&P 500: ', num2str(mean_SP500_PostCOVID)]);
+disp(['Mean DAX: ', num2str(mean_DAX_PostCOVID)]);
+disp(['Mean FTSE 100: ', num2str(mean_FTSE_PostCOVID)]);
+disp(['Correlation (S&P 500 / FTSE 100 Ratio vs USD/GBP): ', num2str(corr_PostCOVID_FTSE)]);
+
+% Visualization
+figure;
+yyaxis left;
+plot(combined_PostCOVID.Date, combined_PostCOVID.SP500_FTSE_Ratio, '-b');
+ylabel('S&P 500 / FTSE 100 Ratio');
+yyaxis right;
+plot(combined_PostCOVID.Date, combined_PostCOVID.Close_USD_GBP_PostCOVID, '-r');
+ylabel('USD/GBP Exchange Rate');
+title('Post-COVID: S&P 500 / FTSE 100 Ratio vs USD/GBP');
+xlabel('Date');
+grid on;
+
+
 % Helper function for candlestick plotting
 function plotCandlestick(dataTT, titleStr)
     candle(dataTT);
@@ -212,4 +341,3 @@ function plotCandlestick(dataTT, titleStr)
     ylabel('Price');
     grid on;
 end
-
